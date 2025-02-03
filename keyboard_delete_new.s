@@ -94,23 +94,39 @@ do_backspace:
 
 check_line1:
     lda first_line_count
-    beq skip_bs
-    lda #$80 
+    beq skip_bs         ; nothing to delete if line1 is empty
+
+    ; Compute DDRAM address for the last character on line 1:
+    ; (address = $80 + (first_line_count – 1))
+    lda #$80            ; base DDRAM command for line 1
     clc
-    adc first_line_count 
+    adc first_line_count
     sec
-    sbc #1 
-    sta temp_addr 
+    sbc #1
+    sta temp_addr       ; save computed address
+
+    ; Set DDRAM address to the computed value
     lda temp_addr
     jsr lcd_instruction
+
+    ; Print a space to erase the character
     lda #' '
     jsr lcd_print_noupdate
+
+    ; Because the LCD auto‑increments, re‑set the DDRAM address back to our target
     lda temp_addr
     jsr lcd_instruction
+
+    ; Now update first_line_count (remove one character)
     lda first_line_count
     sec
     sbc #1
     sta first_line_count
+
+    ; Sync global char_count with the updated first_line_count
+    lda first_line_count
+    sta char_count
+
     jmp finish_bs
 
 finish_bs:
