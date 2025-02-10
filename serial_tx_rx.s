@@ -68,6 +68,8 @@ read_bit:
   clc  ; We read a 0, put a 0 in C flag
   jmp rx_done
 recv_1:
+  nop 
+  nop
   sec  ; We read a 1, put a 1 in the carry flag C
 rx_done:
   ror  ; Rotate A register right, putting the C flag into the most significant bit
